@@ -3,6 +3,10 @@ let posX = 0;
 let posY = 0;
 let width = 0;
 let height = 0;
+let highlighted = [-1, -1];
+const canvas = document.querySelector("#tiles");
+const ctx = canvas.getContext("2d");
+
 async function main() {
     loading();
     grid = new Array(100);
@@ -59,6 +63,13 @@ async function main() {
             }
         }
     });
+    canvas.addEventListener("mouseup", async (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        highlighted = [Math.floor(x / 100) + posX, Math.floor(y / 100) + posY];
+        await render();
+    });
 }
 
 // Based on https://gist.github.com/CatherineH/5d923ec585acdb89ab2df34c095a681c
@@ -91,20 +102,21 @@ async function getSvg(part) {
 }
 
 async function render() {
-    const canvas = document.querySelector("#tiles");
-    const ctx = canvas.getContext("2d");
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             let img = grid[x + posX][y + posY];
             if (img.complete) {
-                ctx.drawImage(img, x * 100, y * 100);
+                if (highlighted[0] != x + posX || highlighted[1] != y + posY) {
+                    ctx.drawImage(img, x * 100, y * 100);
+                }
             } else {
                 img.addEventListener("load", () => {
-                    ctx.drawImage(img, x * 100, y * 100);
+                    if (highlighted[0] != x + posX || highlighted[1] != y + posY) {
+                        ctx.drawImage(img, x * 100, y * 100);
+                    }
                 });
             }
         }
@@ -124,3 +136,12 @@ async function loading() {
     ctx.fillText("Creating Grid...", canvas.width / 2, ctx.canvas.height / 2);
 }
 main();
+
+document.querySelector("#menuButton").addEventListener("click", () => {
+    let menu = document.querySelector("#menuExpanded");
+    if (window.getComputedStyle(menu).getPropertyValue("display") == "none") {
+        menu.style.display = "block";
+    } else {
+        menu.style.display = "none";
+    }
+});
