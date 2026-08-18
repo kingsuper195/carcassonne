@@ -63,11 +63,17 @@ async function main() {
             }
         }
     });
-    canvas.addEventListener("mouseup", async (e) => {
+    canvas.addEventListener("mousedown", async (e) => {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        highlighted = [Math.floor(x / 100) + posX, Math.floor(y / 100) + posY];
+        const x = Math.floor((e.clientX - rect.left) / 100) + posX;
+        const y = Math.floor((e.clientY - rect.top) / 100) + posY;
+        console.log(highlighted);
+        if (highlighted[0] == x && highlighted[1] == y) {
+            highlighted = [-1, -1];
+        } else {
+            highlighted = [x, y];
+        }
+
         await render();
     });
 }
