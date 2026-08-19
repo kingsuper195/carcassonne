@@ -21,7 +21,6 @@ async function main() {
     grid[99][99] = await stackSvgs([await getSvg("Bottom"), await getSvg("Cloister"), await getSvg("Top")]);
     width = Math.floor(window.innerWidth / 100);
     height = Math.floor(window.innerHeight / 100);
-    console.log(width, height);
     await render();
     window.addEventListener("resize", async () => {
         width = Math.floor(window.innerWidth / 100);
@@ -38,28 +37,62 @@ async function main() {
         }
     });
     window.addEventListener("keydown", async (e) => {
-        if (e.key == "ArrowRight") {
-            if (posX < 100 - width) {
-                posX += 1;
-                await render();
+        if (e.shiftKey) {
+            if (highlighted[0] !== -1) {
+                if (e.key == "ArrowRight") {
+                    if (highlighted[0] < 99) {
+                        highlighted[0] += 1;
+                        await render();
+                    }
+                }
+                if (e.key == "ArrowLeft") {
+                    if (highlighted[0] > 0) {
+                        highlighted[0] -= 1;
+                        await render();
+                    }
+                }
+                if (e.key == "ArrowDown") {
+                    if (highlighted[1] < 99) {
+                        highlighted[1] += 1;
+                        await render();
+                    }
+                }
+                if (e.key == "ArrowUp") {
+                    if (highlighted[1] > 0) {
+                        highlighted[1] -= 1;
+                        await render();
+                    }
+                }
+            }
+        } else {
+            if (e.key == "ArrowRight") {
+                if (posX < 100 - width) {
+                    posX += 1;
+                    await render();
+                }
+            }
+            if (e.key == "ArrowLeft") {
+                if (posX > 0) {
+                    posX -= 1;
+                    await render();
+                }
+            }
+            if (e.key == "ArrowDown") {
+                if (posY < 100 - height) {
+                    posY += 1;
+                    await render();
+                }
+            }
+            if (e.key == "ArrowUp") {
+                if (posY > 0) {
+                    posY -= 1;
+                    await render();
+                }
             }
         }
-        if (e.key == "ArrowLeft") {
-            if (posX > 0) {
-                posX -= 1;
-                await render();
-            }
-        }
-        if (e.key == "ArrowDown") {
-            if (posY < 100 - height) {
-                posY += 1;
-                await render();
-            }
-        }
-        if (e.key == "ArrowUp") {
-            if (posY > 0) {
-                posY -= 1;
-                await render();
+        if (e.key == "c") {
+            if (highlighted[0] !== -1) {
+                grid[highlighted[0]][highlighted[1]] = stackSvgs([await getSvg("Bottom"), await getSvg("CCCC"), await getSvg("Top")]);
             }
         }
     });
@@ -67,7 +100,6 @@ async function main() {
         const rect = canvas.getBoundingClientRect();
         const x = Math.floor((e.clientX - rect.left) / 100) + posX;
         const y = Math.floor((e.clientY - rect.top) / 100) + posY;
-        console.log(highlighted);
         if (highlighted[0] == x && highlighted[1] == y) {
             highlighted = [-1, -1];
         } else {
@@ -127,7 +159,6 @@ async function render() {
             }
         }
     }
-    console.log("Renderered");
 }
 
 async function loading() {
