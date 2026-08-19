@@ -6,19 +6,22 @@ let height = 0;
 let highlighted = [-1, -1];
 const canvas = document.querySelector("#tiles");
 const ctx = canvas.getContext("2d");
+let all;
 
 async function main() {
     loading();
+    all = await getAllTiles();
     grid = new Array(100);
-    const basic = [await getSvg("Bottom"), await getSvg("Top")];
+    console.log("The tiles I got were: ", all);
+    const basic = [all.bottom[0], all.top[0]];
     for (let x = 0; x < 100; x++) {
         grid[x] = new Array(100);
         for (let y = 0; y < 100; y++) {
-            grid[x][y] = await stackSvgs(basic);
+            grid[x][y] = await tile("--/--/--/--");
         }
     }
 
-    grid[99][99] = await stackSvgs([await getSvg("Bottom"), await getSvg("Cloister"), await getSvg("Top")]);
+    grid[99][99] = await tile("--/--/--/.0");
     width = Math.floor(window.innerWidth / 100);
     height = Math.floor(window.innerHeight / 100);
     await render();
@@ -92,7 +95,7 @@ async function main() {
         }
         if (e.key == "c") {
             if (highlighted[0] !== -1) {
-                grid[highlighted[0]][highlighted[1]] = stackSvgs([await getSvg("Bottom"), await getSvg("CCCC"), await getSvg("Top")]);
+                grid[highlighted[0]][highlighted[1]] = await tile("--/--/A0/--");
             }
         }
     });
@@ -111,7 +114,7 @@ async function main() {
 }
 
 // Based on https://gist.github.com/CatherineH/5d923ec585acdb89ab2df34c095a681c
-function stackSvgs(inputStrings) {
+function stackSvgs(inputStrings, angle = 0) {
     let svgMain = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100" viewBox="0,0,100,100">`;
     for (let i = 0; i < inputStrings.length; i++) {
         let domParser = new DOMParser();
@@ -133,10 +136,84 @@ async function getSvg(part) {
             throw new Error(`Response status: ${response.status}`);
         }
         const result = await response.text();
-        return result;
+        return [result, rotateSvg(result, 90), rotateSvg(result, 180), rotateSvg(result, 270)];
     } catch (error) {
         console.error(error.message);
     }
+}
+
+function tile(notation) {
+    const sections = notation.split("/");
+    const sectionsAsigns = ["road", "river", "city", "cloister"];
+    const decode = { "A": "all", "C": "corner", "E": "end", "S": "straight", "T": "three" };
+    const outs = [all.bottom[0]];
+    for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        const sa = sectionsAsigns[i];
+        if (sa == "cloister") {
+            let type = section[0];
+            let angleStr = section.substring(1);
+            if (type == "-") {
+                continue;
+            }
+            let angle = +angleStr;
+            if (!([0, 1, 2, 3].includes(angle))) {
+                console.log("INVALID TILE NOTATION!!");
+                continue;
+            }
+            outs.push(all[sa][angle]);
+        } else {
+            let type = section[0];
+            let angleStr = section.substring(1);
+            if (type == "-") {
+                continue;
+            }
+            let angle = +angleStr;
+            if (!([0, 1, 2, 3].includes(angle))) {
+                console.log("INVALID TILE NOTATION!!");
+                continue;
+            }
+            if (!["A", "C", "E", "S", "T"].includes(type)) {
+                console.log("INVALID TILE NOTATION!!");
+                continue;
+            }
+            outs.push(all[sa][decode[type]][angle]);
+        }
+    }
+    outs.push(all.top[0])
+    return stackSvgs(outs);
+}
+
+async function getAllTiles() {
+    let proc = {
+        "road": {
+            "TQ": await getSvg("R-TQ")
+        },
+        "river": {},
+        "city": {},
+        "cloister": await getSvg("Cloister"),
+        "top": await getSvg("Top"),
+        "bottom": await getSvg("Bottom")
+    };
+
+    let types = { "road": "R", "river": "S", "city": "C" };
+    let get = ["End", "Straight", "Corner", "Three", "All"];
+
+    for (const type of Object.keys(types)) {
+        const fl = types[type];
+        for (const edges of get) {
+            proc[type][edges.toLowerCase()] = await getSvg(`${fl}-${edges}`);
+        }
+    }
+    return proc;
+}
+
+function rotateSvg(svg, angle) {
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(svg, "image/svg+xml");
+    doc.documentElement.setAttribute("transform", `rotate(${angle})`);
+    let serializer = new XMLSerializer();
+    return serializer.serializeToString(doc);
 }
 
 async function render() {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg2" width="100" height="100" viewBox="0 0 100 100">
+	<g id="g2" stroke-miterlimit="10">
+		<path id="path1" fill="#c83" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M3.5 99C2.11929 99 1 97.88071 1 96.5v-93C1 2.11929 2.11929 1 3.5 1h93C97.88071 1 99 2.11929 99 3.5v93c0 1.38071-1.11929 2.5-2.5 2.5z" style="stroke-width:0;stroke-dasharray:none" />
+		<path id="path2" fill="none" stroke="#fff" stroke-linecap="butt" stroke-linejoin="miter" stroke-width="0" d="M0 100V0h100v100z" />
+	</g>
+</svg>
