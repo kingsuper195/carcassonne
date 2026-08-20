@@ -211,7 +211,8 @@ async function getAllTiles() {
 function rotateSvg(svg, angle) {
     let parser = new DOMParser();
     let doc = parser.parseFromString(svg, "image/svg+xml");
-    doc.documentElement.setAttribute("transform", `rotate(${angle})`);
+    doc.documentElement.children[0].setAttribute("transform", `rotate(${angle})`);
+    doc.documentElement.children[0].setAttribute("transform-origin", `50% 50%`);
     let serializer = new XMLSerializer();
     return serializer.serializeToString(doc);
 }
