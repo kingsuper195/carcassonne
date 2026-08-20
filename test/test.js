@@ -26,36 +26,39 @@ function tile(notation) {
     const decode = { "A": "all", "C": "corner", "E": "end", "S": "straight", "T": "three" };
     const outs = [all.bottom[0]];
     for (let i = 0; i < sections.length; i++) {
-        const section = sections[i];
+        const sectionWhole = sections[i];
         const sa = sectionsAsigns[i];
-        if (sa == "cloister") {
-            let type = section[0];
-            let angleStr = section.substring(1);
-            if (type == "-") {
-                continue;
+        const sectionSplit = sectionWhole.split("&");
+        for (const section of sectionSplit) {
+            if (sa == "cloister") {
+                let type = section[0];
+                let angleStr = section.substring(1);
+                if (type == "-") {
+                    continue;
+                }
+                let angle = +angleStr;
+                if (!([0, 1, 2, 3].includes(angle))) {
+                    console.log("INVALID TILE NOTATION!!");
+                    continue;
+                }
+                outs.push(all[sa][angle]);
+            } else {
+                let type = section[0];
+                let angleStr = section.substring(1);
+                if (type == "-") {
+                    continue;
+                }
+                let angle = +angleStr;
+                if (!([0, 1, 2, 3].includes(angle))) {
+                    console.log("INVALID TILE NOTATION!!");
+                    continue;
+                }
+                if (!["A", "C", "E", "S", "T"].includes(type)) {
+                    console.log("INVALID TILE NOTATION!!");
+                    continue;
+                }
+                outs.push(all[sa][decode[type]][angle]);
             }
-            let angle = +angleStr;
-            if (!([0, 1, 2, 3].includes(angle))) {
-                console.log("INVALID TILE NOTATION!!");
-                continue;
-            }
-            outs.push(all[sa][angle]);
-        } else {
-            let type = section[0];
-            let angleStr = section.substring(1);
-            if (type == "-") {
-                continue;
-            }
-            let angle = +angleStr;
-            if (!([0, 1, 2, 3].includes(angle))) {
-                console.log("INVALID TILE NOTATION!!", section);
-                continue;
-            }
-            if (!["A", "C", "E", "S", "T"].includes(type)) {
-                console.log("INVALID TILE NOTATION!!", section);
-                continue;
-            }
-            outs.push(all[sa][decode[type]][angle]);
         }
     }
     outs.push(all.top[0]);
